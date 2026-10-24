@@ -1,5 +1,6 @@
 package clientPackage;
 
+import common.Calcul;
 import java.io.*;
 import java.net.*;
 import java.util.List;
@@ -9,7 +10,7 @@ public class Client {
     static final String IP_SERVEUR = "192.168.0.86"; // adresse IP de la machine serveur
     static final int PORT = 1234;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,ClassNotFoundException {
         Scanner scanner =new Scanner(System.in);
 
         InetAddress adresseIp = InetAddress.getByName(IP_SERVEUR);
@@ -19,8 +20,9 @@ public class Client {
         s.connect(adresseServeur, 5000);
         System.out.println("je suis un client connecté à " + IP_SERVEUR + ":" + PORT);
 
-        DataOutputStream out = new DataOutputStream(s.getOutputStream());
-        DataInputStream in = new DataInputStream(s.getInputStream());
+        ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
+        out.flush();
+        ObjectInputStream in = new ObjectInputStream(s.getInputStream());
         String op;
         while (true) {
             do {
@@ -28,8 +30,13 @@ public class Client {
                 op = scanner.next();
             } while (!op.equals("E") && !List.of("+", "-", "*", "/").contains(op));
 
-            out.writeUTF(op);
-            if (op.equals("E")) break;
+            if (op.equals("E")) {
+                out.writeObject(new Calcul(0, 0, "E"));
+                out.flush();
+                in.close();
+                out.close();
+                break;
+            }
 
             System.out.print("First number: ");
             double first = scanner.nextDouble();
@@ -43,8 +50,8 @@ public class Client {
                 }
             } while (op.equals("/") && second == 0);
 
-            out.writeDouble(first);
-            out.writeDouble(second);
+            out.writeObject(new Calcul(first, second, op));
+            out.flush();
             System.out.println("Résultat : " + in.readDouble());
         }
         s.close();
