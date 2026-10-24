@@ -2,6 +2,7 @@ package clientPackage;
 
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Client {
@@ -20,18 +21,32 @@ public class Client {
 
         DataOutputStream out = new DataOutputStream(s.getOutputStream());
         DataInputStream in = new DataInputStream(s.getInputStream());
-        int number;
         String op;
-        do{
-            System.out.println("Enter The Operator ");
-            op=scanner.next();
-            System.out.println("Enter Your Number(0 to stop): ");
-            number=scanner.nextInt();
-            out.writeInt(number);
+        while (true) {
+            do {
+                System.out.print("Operator (+ - * /, E to exit): ");
+                op = scanner.next();
+            } while (!op.equals("E") && !List.of("+", "-", "*", "/").contains(op));
+
             out.writeUTF(op);
-            double resultat = in.readDouble();
-            System.out.println("Résultat : " + resultat);
-        }while (number!=0);
+            if (op.equals("E")) break;
+
+            System.out.print("First number: ");
+            double first = scanner.nextDouble();
+
+            double second;
+            do {
+                System.out.print("Second number: ");
+                second = scanner.nextDouble();
+                if (op.equals("/") && second == 0) {
+                    System.out.println("Cannot divide by zero.");
+                }
+            } while (op.equals("/") && second == 0);
+
+            out.writeDouble(first);
+            out.writeDouble(second);
+            System.out.println("Résultat : " + in.readDouble());
+        }
         s.close();
         scanner.close();
     }

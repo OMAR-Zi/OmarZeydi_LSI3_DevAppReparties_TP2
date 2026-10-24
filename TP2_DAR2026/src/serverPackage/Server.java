@@ -14,21 +14,35 @@ public class Server {
         System.out.println("un client est connecté" + s.getInetAddress());
         DataInputStream in = new DataInputStream(s.getInputStream());
         DataOutputStream out = new DataOutputStream(s.getOutputStream());
-        int number;
-        do {
-            number = in.readInt();
+
+        while(true) {
             String op = in.readUTF();
+            if (op.equals("E")){
+                System.out.println("Closing connection...");
+                break;
+            }
+            double first = in.readDouble();
+            double second = in.readDouble();
             double resultat;
 
             switch (op) {
-                case "+": resultat = number + 5; break;
-                case "-": resultat = number - 5; break;
-                case "*": resultat = number * 5; break;
-                case "/": resultat = number / 5.0; break;
-                default:  resultat = 0;           // unknown operator
+                case "+":
+                    resultat = first + second;
+                    break;
+                case "-":
+                    resultat = first - second;
+                    break;
+                case "*":
+                    resultat = first * second;
+                    break;
+                case "/":
+                    resultat = first / second;
+                    break;
+                default:
+                    resultat = 0;
             }
             out.writeDouble(resultat);
-        } while (number != 0);
+        }
 
         s.close();
         sk.close();
